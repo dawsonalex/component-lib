@@ -1,0 +1,14 @@
+body {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    grid-auto-rows: minmax(100px, auto);
+}
+
+.hero-component {
+    grid-row: 1 / 2;
+    grid-column: 5;
+
+    border: 1px solid orange;
+    background-color: rgba(255, 196, 0, 0.3);
+}

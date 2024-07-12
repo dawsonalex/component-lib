@@ -1,0 +1,107 @@
+<html lang="">
+<head>
+    <title>Site builder</title>
+    <style>
+        #app {
+            display: flex;
+            height: 30%;
+            flex-direction: column;
+            height: 100%;
+        }
+        #builder {
+            border: solid black 3px;
+            flex: 1;
+        }
+        [draggable="true"] {
+            cursor: grab;
+        }
+
+        [draggable="true"]:active {
+            cursor: grabbing;
+        }
+        #components {
+            border: solid pink 3px;
+            flex: 1;
+        }
+        #editor {
+            flex: 1;
+        }
+        #editor > article {
+            height: 100%;
+        }
+        #preview {
+            border: solid red 3px;
+            flex: 1;
+        }
+        .flex-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+        }
+    </style>
+    <script>
+      let globalId = 0;
+      function dragstartHandler(ev) {
+        // Add the target element's id to the data transfer object
+        ev.dataTransfer.setData("text/plain", ev.target.id);
+        ev.dataTransfer.effectAllowed = "move";
+      }
+      function dragoverHandler(ev) {
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = "move";
+      }
+      function dropHandler(ev) {
+        ev.preventDefault();
+        // Get the id of the target and add the moved element to the target's DOM
+        const data = ev.dataTransfer.getData("text/plain");
+        let newChild = document.getElementById(data);
+
+        // Clone the child if the drag is from the components box
+        if (document.querySelector(`#components > #${data}`) !== null) {
+          newChild = newChild.cloneNode(true);
+        }
+        newChild.id = `${newChild.id}-${globalId}`;
+        newChild.contentEditable = 'true';
+        newChild.addEventListener('input', function() {
+          updatePreview();
+        });
+        ev.target.appendChild(newChild);
+        updatePreview();
+      }
+
+      /**
+       * Update the preview window with the children of the builder section.
+       *
+       * TODO: At some point this should call the Go WASM API.
+       */
+      function updatePreview() {
+        let builderChildren = document.getElementById('builder').cloneNode(true);
+
+        let previewWindow = document.getElementById('preview');
+        previewWindow.replaceChildren(...builderChildren.childNodes);
+      }
+    </script>
+</head>
+<body onload="updatePreview()">
+<section id="app">
+    <article id="components">
+        <header id="header-component" ondragstart="dragstartHandler(event)" draggable="true">NEW HEADER</header>
+        <article id="article-component" ondragstart="dragstartHandler(event)" draggable="true">
+            This is an article
+        </article>
+    </article>
+    <div id="editor" class="flex-row">
+        <article id="builder" ondrop="dropHandler(event)" ondragover="dragoverHandler(event)" onchange="updatePreview()">
+            <header ondragstart="dragstartHandler(event)" id="dragheader" draggable="true">This is the heading</header>
+            <section ondragstart="dragstartHandler(event)" id="dragsection" draggable="true">
+                This is the section.
+            </section>
+        </article>
+        <article id="preview">
+
+        </article>
+    </div>
+</section>
+</body>
+</html>
